@@ -1,0 +1,26 @@
+{
+  "name": "grand-theft-browser",
+  "version": "1.0.0",
+  "description": "An open-world crime sandbox that runs in the browser (Three.js)",
+  "main": "src/main.js",
+  "scripts": {
+    "build": "node build.mjs --min",
+    "dev": "node build.mjs",
+    "start": "node serve.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hongyunlim-itech/gta7.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hongyunlim-itech/gta7/issues"
+  },
+  "homepage": "https://github.com/hongyunlim-itech/gta7#readme",
+  "dependencies": {
+    "esbuild": "^0.28.2",
+    "three": "^0.186.1"
+  }
+}
