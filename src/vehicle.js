@@ -135,7 +135,10 @@ export class Vehicle {
       // ---- yaw ----
       let yaw = (vf / s.wb) * Math.tan(this.steer);
       if (this.handbrake && Math.abs(vf) > 4) yaw *= 1.7;
-      this.yawRate = damp(this.yawRate, clamp(yaw, -2.8, 2.8), 14, dt);
+      // cornering is limited by lateral grip: yaw rate <= a_lat / speed (drifts allowed with the handbrake)
+      const aLat = s.grip * 2.3 * (this.handbrake ? 2.2 : 1);
+      const yawMax = Math.min(2.8, aLat / Math.max(Math.abs(vf), 3));
+      this.yawRate = damp(this.yawRate, clamp(yaw, -yawMax, yawMax), 14, dt);
       this.slip = Math.abs(vl);
     } else {
       this.yawRate *= Math.exp(-0.5 * dt);
@@ -157,14 +160,18 @@ export class Vehicle {
       }
     } else {
       const prev = this.y;
-      // slope-based vertical speed along ramps (to launch at the lip)
-      const ahead = groundHeight(this.x + fxv * 0.6, this.z + fzv * 0.6) - gh2;
+      // climb rate along ramps (measured from the slope behind us) so we can launch off the lip
       const onRamp = gh2 > 0.3;
-      const wantVy = onRamp ? (ahead / 0.6) * vf : 0;
-      this.rampVy = damp(this.rampVy, wantVy, 30, dt);
-      if (gh2 < prev - 0.35 && this.rampVy > 1.5 && Math.abs(vf) > 5) { this.air = true; this.vy = this.rampVy; }
-      else if (Math.abs(gh2 - prev) < 0.5) this.y = damp(prev, gh2, 26, dt);
-      else this.y = gh2;
+      if (onRamp) {
+        const behind = groundHeight(this.x - fxv * 0.6, this.z - fzv * 0.6);
+        this.rampVy = damp(this.rampVy, Math.max(0, ((gh2 - behind) / 0.6) * vf), 30, dt);
+      }
+      if (gh2 < prev - 0.35 && this.rampVy > 1.5 && Math.abs(vf) > 5) { this.air = true; this.vy = this.rampVy; this.rampVy = 0; }
+      else {
+        if (!onRamp) this.rampVy = 0;
+        if (Math.abs(gh2 - prev) < 0.5) this.y = damp(prev, gh2, 26, dt);
+        else this.y = gh2;
+      }
     }
     // pitch from ground slope / trajectory
     let pt;
@@ -193,6 +200,7 @@ export class Vehicle {
   collideWorld(dt) {
     obbStatics(this.obb, (res, c) => {
       if (this.y > c.h + 0.4 || c.tag === 'pond') return;
+      if (c.rb && ((c.rb.axis === 'x' ? this.x : this.z) - c.rb.edge) * c.rb.sign < 0) return; // on the ramp side
       this.x += res.nx * res.depth; this.z += res.nz * res.depth;
       this.obb.x = this.x; this.obb.z = this.z;
       const vn = this.vx * res.nx + this.vz * res.nz;

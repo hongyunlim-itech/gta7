@@ -47,7 +47,7 @@ export class TrafficAI {
     this.dir = lane.dir; this.ni = lane.ni; this.nj = lane.nj;
     this.queue = []; this.prev = { x: veh.x, z: veh.z };
     this.cruise = rr(10, 15.5) * (VTYPES[veh.key].vmax > 50 ? 1.05 : 1) * (veh.key === 'bus' ? 0.75 : 1);
-    this.stuckT = 0; this.reverseT = 0; this.panic = 0; this.honk = 0; this.wait = 0;
+    this.stuckT = 0; this.reverseT = 0; this.panic = 0; this.honk = 0; this.wait = 0; this.waitT = 0; this.ghostT = 0; this.idleT = 0; this.why = 'go';
     this.plan(veh);
   }
 
@@ -119,6 +119,7 @@ export class TrafficAI {
     let target = this.cruise * (this.panic > 0 ? 1.5 : 1);
     if (nxt.turn || (q[1] && q[1].turn) || (q[2] && q[2].turn)) target = Math.min(target, 6.2);
     // traffic signal
+    let lightHold = false;
     for (let i = 0; i < q.length && i < 4; i++) {
       const p = q[i];
       if (!p.stop) continue;
@@ -126,15 +127,21 @@ export class TrafficAI {
       if (dist < -1) break;
       const st = lightState(p.stop);
       const canStop = dist > (vf * vf) / (2 * 6.5) + 3;
-      if (st === 'red' || (st === 'yellow' && canStop)) target = Math.min(target, Math.sqrt(Math.max(0, 2 * 4.5 * (dist - 1.2))));
+      if (st === 'red' || (st === 'yellow' && canStop)) { target = Math.min(target, Math.sqrt(Math.max(0, 2 * 4.5 * (dist - 1.2)))); lightHold = true; }
       break;
     }
-    // obstacles
-    const ob = obstacleAhead(veh, 6 + Math.max(0, vf) * 1.3);
+    // obstacles (with a deadlock breaker: after waiting a while, creep through and let physics shove)
+    this.ghostT = Math.max(0, this.ghostT - dt);
+    let ob = obstacleAhead(veh, 6 + Math.max(0, vf) * 1.3);
+    if (this.ghostT > 0) { if (ob > 1.2) ob = Infinity; target = Math.min(target, 4); }
     if (ob < Infinity) {
       target = Math.min(target, Math.max(0, (ob - 2.2)) * 1.1);
       if (ob < 1.6) target = 0;
     }
+    this.why = lightHold ? 'light' : ob < Infinity && target < 1 ? 'obstacle' : 'go';
+    if (this.why === 'obstacle' && Math.abs(vf) < 0.6) this.waitT += dt; else this.waitT = Math.max(0, this.waitT - dt * 2);
+    if (this.waitT > 4 + (veh.id % 6) * 0.9) { this.waitT = 0; this.ghostT = 3.5; }
+    if (Math.abs(vf) < 0.5 && this.why !== 'light') this.idleT += dt; else this.idleT = Math.max(0, this.idleT - dt);
     const e = target - vf;
     if (e > 0) { veh.throttle = clamp(e * 0.4, 0, 1); veh.brakeIn = 0; }
     else { veh.throttle = 0; veh.brakeIn = clamp(-e * 0.22, 0, 1); }
@@ -223,7 +230,7 @@ export const traffic = {
       if (far || (v.tag === 'left' && d > 520)) { v.remove(); continue; }
       if (v.ai) moving++; else if (v.parked && !v.exploded) parked++;
       // stuck AI cars get recycled when nobody is looking
-      if (v.ai && v.ai.stuckCount > 3 && this.hidden(v.x, v.z, 60)) v.remove();
+      if (v.ai && (v.ai.stuckCount > 3 || v.ai.idleT > 22) && this.hidden(v.x, v.z, 60)) v.remove();
     }
     const want = Math.round(TRAFFIC_TARGET * (G.settings.quality >= 1 ? 1 : 0.6));
     for (let i = moving; i < want && i < moving + 3; i++) this.spawnMoving(p.x, p.z, SPAWN_MIN, SPAWN_MAX);

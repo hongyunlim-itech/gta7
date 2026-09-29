@@ -222,8 +222,9 @@ function setupTerrain(scene) {
     const a = (i / 34) * TAU + rng() * 0.2, r = 1500 + rng() * 900;
     const h = 90 + rng() * 300, rad = 160 + rng() * 260;
     const x = Math.cos(a) * r, z = Math.sin(a) * r;
-    const seg = 7, col = [0.30 + rng() * 0.08, 0.38 + rng() * 0.08, 0.36 + rng() * 0.06];
-    hg.cylinder(x, -4, z, rad, h, seg, col, true, rad * 0.06);
+    const seg = 8, g = rng() * 0.05, col = [0.10 + g, 0.17 + g, 0.11 + g * 0.6];
+    hg.cylinder(x, -4, z, rad, h * 0.55, seg, col, true, rad * 0.5);
+    hg.cylinder(x, -4 + h * 0.5, z, rad * 0.55, h * 0.5, seg, [col[0] * 0.9, col[1] * 0.95, col[2]], true, rad * 0.05);
   }
   const hills = hg.mesh(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true }), { cast: false, receive: false });
   scene.add(hills);
@@ -452,19 +453,23 @@ function fillBlock(type, cx, cz, i, j, rng) {
   } else if (type === 'stunt') {
     S.props.box(cx, CURB, cz, 1, 0, 1, [1, 1, 1]);
     const col = [0.95, 0.55, 0.1];
+    // Run-ups start at the lot edge (22 m), gaps are sized for a ~100 km/h jump.
     const ramps = [
-      [cx - 34, cz - 30, cx - 18, cz - 20, 'x', 1, 3.6], [cx + 18, cz - 30, cx + 34, cz - 20, 'x', -1, 3.6],
-      [cx - 8, cz + 6, cx + 8, cz + 22, 'z', 1, 4.2], [cx + 14, cz + 8, cx + 24, cz + 24, 'z', -1, 3.2],
+      [cx - 14, cz - 31, cx, cz - 21, 'x', 1, 4.4], [cx + 18, cz - 31, cx + 32, cz - 21, 'x', -1, 4.4],   // pair 1 along x
+      [cx - 32, cz - 14, cx - 20, cz, 'z', 1, 4.2], [cx - 32, cz + 18, cx - 20, cz + 32, 'z', -1, 4.2],   // pair 2 along z
+      [cx + 4, cz + 8, cx + 14, cz + 22, 'z', 1, 3.0],                                                    // stand-alone kicker
     ];
     for (const [x0, z0, x1, z1, ax, sg, h] of ramps) {
       const w = new GeoBuilder(); w.wedge(x0, z0, x1, z1, ax, sg, h, col); S.props.append(w, CURB);
       addRamp(x0, z0, x1, z1, ax, sg, h);
       // block the vertical back wall for approaches from behind; collider is lower than the lip so jumpers clear it
       const t = 0.6;
-      if (ax === 'x') { if (sg > 0) addBox(x1, z0, x1 + t, z1, h - 0.6, 'rampback'); else addBox(x0 - t, z0, x0, z1, h - 0.6, 'rampback'); }
-      else { if (sg > 0) addBox(x0, z1, x1, z1 + t, h - 0.6, 'rampback'); else addBox(x0, z0 - t, x1, z0, h - 0.6, 'rampback'); }
+      let wall, edge;
+      if (ax === 'x') { if (sg > 0) { edge = x1; wall = addBox(x1, z0, x1 + t, z1, h - 0.6, 'rampback'); } else { edge = x0; wall = addBox(x0 - t, z0, x0, z1, h - 0.6, 'rampback'); } }
+      else { if (sg > 0) { edge = z1; wall = addBox(x0, z1, x1, z1 + t, h - 0.6, 'rampback'); } else { edge = z0; wall = addBox(x0, z0 - t, x1, z0, h - 0.6, 'rampback'); } }
+      wall.rb = { axis: ax, sign: sg, edge }; // only blocks vehicles that are NOT on the ramp side
     }
-    for (let k = 0; k < 6; k++) { const x = cx - 30 + k * 12, z = cz + 32; S.props.box(x, CURB, z, 3, 1.1, 1.2, [0.85, 0.85, 0.2], { tile: 2 }); addBox(x - 1.5, z - 0.6, x + 1.5, z + 0.6, 1.1, 'barrier'); }
+    for (let k = 0; k < 4; k++) { const x = cx + 4 + k * 8, z = cz - 6; S.props.box(x, CURB, z, 3, 1.1, 1.2, [0.85, 0.85, 0.2], { tile: 2 }); addBox(x - 1.5, z - 0.6, x + 1.5, z + 0.6, 1.1, 'barrier'); }
   }
 }
 

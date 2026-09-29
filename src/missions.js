@@ -148,7 +148,7 @@ export const missions = {
     if (pass) {
       let reward = a.reward;
       if (a.kind === 'delivery' && a.car) reward += Math.round(a.car.hpFrac * 1000);
-      if (a.kind === 'race') reward += Math.round(Math.max(0, a.timer) * 40);
+      if (a.kind === 'race') reward += Math.round(clamp(a.timer, 0, 60) * 30);
       G.player.addMoney(reward); G.stats.missions++;
       audio.missionPass();
       G.hud.banner('MISSION PASSED', 'pass', 3600);

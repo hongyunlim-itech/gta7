@@ -125,7 +125,7 @@ export class Cop extends Actor {
     this.faceTowards(Math.atan2(dx, dz), dt, 10);
   }
   shoot(t, dist) {
-    const w = { ...COP_GUN, dmg: 5 + police.wanted * 1.4 };
+    const w = { ...COP_GUN, dmg: 4 + police.wanted * 1.1 };
     const spread = clamp(0.085 - police.wanted * 0.011 + dist * 0.0009, 0.03, 0.14);
     const ox = this.x + Math.sin(this.heading) * 0.5, oz = this.z + Math.cos(this.heading) * 0.5, oy = this.y + 1.45;
     const tx = t.x + rr(-0.3, 0.3), ty = t.y + (t.veh ? 0.9 : 1.1), tz = t.z + rr(-0.3, 0.3);
@@ -253,7 +253,7 @@ export class Heli {
           const ox = this.x, oy = this.y - 1.2, oz = this.z;
           const tx2 = t.x + rr(-1, 1), ty2 = t.y + 1, tz2 = t.z + rr(-1, 1);
           const dx = tx2 - ox, dy = ty2 - oy, dz = tz2 - oz, dd = Math.hypot(dx, dy, dz);
-          const w = { ...HELI_GUN, dmg: 3 + police.wanted };
+          const w = { ...HELI_GUN, dmg: 2.5 + police.wanted * 0.8 };
           fireWeapon(this, w, { x: ox, y: oy, z: oz }, { x: dx / dd, y: dy / dd, z: dz / dd }, { x: ox + dx / dd * 2, y: oy + dy / dd * 2, z: oz + dz / dd * 2 }, { spread: 0.045 });
           this.burst++; if (this.burst >= 8) { this.burst = 0; this.shootT = rr(2.2, 3.5); } else this.shootT = 0.09;
         } else this.shootT = 0.6;

@@ -206,4 +206,4 @@ function frame(now) {
 
 document.getElementById('loading').textContent = 'Building the city…';
 setTimeout(() => { try { setup(); } catch (e) { console.error(e); document.getElementById('loading').textContent = 'Failed to start: ' + e.message; } requestAnimationFrame(frame); }, 40);
-window.__game = { G, renderer, scene, camera, startGame, pause, Input, simulate: (n, dt = 1 / 30) => { for (let i = 0; i < n; i++) { simulate(dt); Input.endFrame(); } }, render: () => renderer.render(scene, camera), stopLoop: () => { ready = false; }, startLoop: () => { ready = true; last = performance.now(); } };
+window.__game = { Vehicle, Ped: peds, police, pickups, missions, G, renderer, scene, camera, startGame, pause, Input, simulate: (n, dt = 1 / 30) => { for (let i = 0; i < n; i++) { simulate(dt); Input.endFrame(); } }, render: () => renderer.render(scene, camera), stopLoop: () => { ready = false; }, startLoop: () => { ready = true; last = performance.now(); } };

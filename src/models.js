@@ -77,14 +77,15 @@ export function makeHumanoid(o = {}) {
   if (o.cop) { tb.box(0, 1.0, 0, 0.48, 0.07, 0.28, [0.08, 0.08, 0.09]); tb.box(0.12, 1.36, 0.135, 0.07, 0.07, 0.02, [0.85, 0.7, 0.2]); }
   tb.box(0, 1.5, 0, 0.09, 0.06, 0.09, skin); // neck
   const parts = [tb.build()];
-  const skull = new THREE.SphereGeometry(0.125, 9, 7); skull.translate(0, 1.68, 0); skull.scale(1, 1.05, 1.03); parts.push(colored(skull, skin));
+  const skull = new THREE.SphereGeometry(0.125, 9, 7); skull.scale(1, 1.05, 1.03); skull.translate(0, 1.68, 0); parts.push(colored(skull, skin));
+  const face = new GeoBuilder(); face.box(0.045, 1.685, 0.115, 0.034, 0.028, 0.02, [0.05, 0.05, 0.06]); face.box(-0.045, 1.685, 0.115, 0.034, 0.028, 0.02, [0.05, 0.05, 0.06]); face.box(0, 1.645, 0.122, 0.04, 0.03, 0.03, skin); parts.push(face.build());
   if (o.cop) {
     const cap = new GeoBuilder(); cap.box(0, 1.79, 0.01, 0.27, 0.09, 0.28, [0.06, 0.09, 0.2]); cap.box(0, 1.77, 0.17, 0.24, 0.02, 0.12, [0.03, 0.05, 0.1]);
     parts.push(cap.build());
   } else if (o.hat) {
     const hb = new GeoBuilder(); const hc = hexc(o.hat); hb.box(0, 1.79, 0, 0.3, 0.05, 0.3, hc); hb.box(0, 1.83, 0, 0.2, 0.08, 0.2, hc); parts.push(hb.build());
   } else {
-    const hg = new THREE.SphereGeometry(0.135, 9, 6, 0, TAU, 0, Math.PI * 0.55); hg.translate(0, 1.7, -0.012); parts.push(colored(hg, hair));
+    const hg = new THREE.SphereGeometry(0.133, 9, 6, 0, TAU, 0, Math.PI * 0.52); hg.scale(1, 1.05, 1.03); hg.translate(0, 1.69, -0.012); parts.push(colored(hg, hair));
   }
   const torso = mk(mergeGeometries(parts.map((g) => { if (!g.attributes.uv) g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2)); return g.index ? g.toNonIndexed() : g; })), 0, 0, 0);
   const hand = new THREE.Group(); hand.position.set(0, -0.62, 0.04); armR.add(hand);

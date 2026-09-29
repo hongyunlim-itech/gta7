@@ -74,8 +74,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
 #fmap { max-width: 92vh; max-height: 92vh; width: 92vh; height: 92vh; border: 3px solid rgba(255,255,255,.5); border-radius: 6px; background: #111; }
 #fmap-legend { margin-top: 8px; opacity: .8; }
 
-#menu { position: fixed; inset: 0; background: radial-gradient(ellipse at 50% 30%, rgba(30,40,70,.86), rgba(4,6,12,.96)); display: flex; align-items: center; justify-content: center; overflow-y: auto; z-index: 10; }
-#menu-inner { max-width: 880px; padding: 28px 24px; text-align: center; }
+#menu { position: fixed; inset: 0; background: radial-gradient(ellipse at 50% 30%, rgba(30,40,70,.9), rgba(4,6,12,.97)); display: flex; overflow-y: auto; z-index: 10; }
+#menu-inner { max-width: 880px; padding: 28px 24px; text-align: center; margin: auto; }
 #menu h1 { font-family: Impact, "Arial Black", sans-serif; font-size: clamp(44px, 9vw, 92px); line-height: .95; letter-spacing: .06em; color: #fff; text-shadow: 0 4px 0 #000, 0 0 40px rgba(255,120,40,.35); }
 #menu h1 span { color: #ff7a2a; }
 #menu .sub { margin: 10px 0 18px; opacity: .8; letter-spacing: .12em; text-transform: uppercase; font-size: 14px; }
