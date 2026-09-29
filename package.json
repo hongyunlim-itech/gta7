@@ -6,7 +6,8 @@
   "scripts": {
     "build": "node build.mjs --min",
     "dev": "node build.mjs",
-    "start": "node serve.mjs"
+    "start": "node serve.mjs",
+    "build:artifact": "node build.mjs --min && node build-artifact.mjs"
   },
   "repository": {
     "type": "git",

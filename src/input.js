@@ -39,7 +39,7 @@ export function initInput(canvas) {
   window.addEventListener('mouseup', (e) => { mouseButtons.delete(e.button); });
   window.addEventListener('contextmenu', (e) => e.preventDefault());
   window.addEventListener('mousemove', (e) => {
-    if (Input.locked || (Input.dragLook && e.buttons)) { dx += e.movementX || 0; dy += e.movementY || 0; }
+    if (Input.locked || Input.dragLook) { dx += e.movementX || 0; dy += e.movementY || 0; }
   });
   window.addEventListener('wheel', (e) => { if (Input.locked || Input.dragLook) wheel += Math.sign(e.deltaY); }, { passive: true });
   document.addEventListener('pointerlockchange', () => {

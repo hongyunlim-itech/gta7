@@ -55,6 +55,12 @@ function buildEnv() {
 
 // -------------------------------------------------------------- game setup
 let ready = false;
+let fallbackShown = false;
+// Pointer lock can be refused (sandboxed frames, some browsers): keep playing with free mouse look + arrow keys
+function enableFallback(quiet) {
+  Input.dragLook = true;
+  if (!fallbackShown && !quiet && G.started) { fallbackShown = true; hud.toast('Mouse capture unavailable: move the mouse or use the arrow keys to look. Esc pauses.', 6500); }
+}
 function setup() {
   initInput(canvas);
   buildEnv();
@@ -92,11 +98,11 @@ function startGame(noLock) {
   hud.show(true);
   G.started = true; G.paused = false; last = performance.now();
   Input.reset();
-  if (noLock) { Input.dragLook = true; return; }
+  if (noLock) { enableFallback(true); return; }
   try {
     const r = canvas.requestPointerLock();
-    if (r && r.catch) r.catch(() => { Input.dragLook = true; });
-  } catch (e) { Input.dragLook = true; }
+    if (r && r.catch) r.catch(() => enableFallback());
+  } catch (e) { enableFallback(); }
 }
 
 function applySettings() {
@@ -126,10 +132,10 @@ document.getElementById('play').addEventListener('click', () => {
     G.settings.shadows = document.getElementById('opt-shadows').checked; G.settings.quality = +document.getElementById('opt-quality').value;
     applySettings(); audio.setVolume(G.settings.volume);
     pause(false);
-    if (!Input.dragLook) { try { const r = canvas.requestPointerLock(); if (r && r.catch) r.catch(() => { Input.dragLook = true; }); } catch (e) { Input.dragLook = true; } }
+    if (!Input.dragLook) { try { const r = canvas.requestPointerLock(); if (r && r.catch) r.catch(() => enableFallback()); } catch (e) { enableFallback(); } }
   }
 });
-document.addEventListener('pointerlockerror', () => { Input.dragLook = true; });
+document.addEventListener('pointerlockerror', () => enableFallback());
 window.addEventListener('keydown', (e) => {
   if (e.code === 'Escape' && Input.dragLook && G.started) pause(!G.paused);
   if (G.paused) return;

@@ -14,6 +14,7 @@ npm start       # serves http://localhost:8080
 ```
 
 Click **CLICK TO PLAY** (the mouse is captured; press `Esc` to pause). Desktop keyboard + mouse; a discrete GPU is recommended.
+If the browser refuses to capture the mouse (for example inside a sandboxed frame) the game falls back to free mouse look plus the arrow keys.
 On slower machines use the **Quality: Low** / **Shadows** options on the start screen.
 
 ## What's in it
@@ -70,8 +71,9 @@ src/
 ```
 
 ```bash
-npm run dev     # unminified bundle with source map -> dist/game.js
-npm run build   # minified bundle
+npm run dev             # unminified bundle with source map -> dist/game.js
+npm run build           # minified bundle
+npm run build:artifact  # single self-contained HTML page -> dist/artifact.html (for embedding / publishing)
 ```
 
 Tips: `?autostart` skips the menu, `?noshadow` starts in low quality (both are handy for automated testing);

@@ -350,6 +350,10 @@ export function updateCamera(dt, first = false) {
   if (!G.paused_input && !p.dead) {
     p.yaw -= m.dx * sens; p.pitch += m.dy * sens;
   }
+  if (!v && !G.paused_input && !p.dead) { // arrow keys look around on foot (keyboard fallback when the mouse can't be captured)
+    p.yaw += ((Input.down('ArrowLeft') ? 1 : 0) - (Input.down('ArrowRight') ? 1 : 0)) * dt * 2.4;
+    p.pitch += ((Input.down('ArrowDown') ? 1 : 0) - (Input.down('ArrowUp') ? 1 : 0)) * dt * 1.6;
+  }
   p.pitch = clamp(p.pitch, -0.55, 1.25);
   if (v) {
     if (m.dx || m.dy) idleLook = 0; else idleLook += dt;
